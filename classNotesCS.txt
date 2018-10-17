@@ -1,0 +1,202 @@
+dir - display current directory
+cd - change directory
+	e.g "cd documents" changes your directory to your documents folder 
+
+#######################
+## JUPYTER NOTEBOOKS ##
+#######################
+
+To open jupyter notebook:
+	open Anaconda Prompt (Anaconda-specific command line)
+	"jupyter notebook" to open up jupyter
+	navigate to python class files
+	(this is alternative to typing "jupyter notebook" directly into command line, which didn't work)	
+
+	markdown cells - make the text look nice
+		double click to reveal markdown code
+		ctrl + enter - executes content of the cell
+	press H when not in a cell to see list of shortcuts
+	escape + C - makes new code cell
+	escape + M - makes new markdown cell
+	to insert link
+		[link text in brackets](http://www.yourlinkhere.com)
+	X - cut current cell
+	line magics
+		% lets you know you're in line magics
+		%timeit can help you figure out bottlenecks in code 
+		%who finds all of some kind of data (e.g. "%who list" finds all the lists you're using)
+	cell magics
+		%% goes at beginning of cell and applies to the entire cell
+	? before function gives you documentation on it
+	?? gives you even more info
+	"import numpy as np"
+		adds numpy library; "as np" names it np for calling later (this is standard)
+		np. then calls functions from that library
+			e.g. "np.random.rand" calls the random.rand function from numpy
+		don't have to import entire library if only going to call one or two functions
+			e.g. could do "from numpy import arange" which imports ONLY the arange function
+			you can now call it directly -- don't need to use np. notation
+			e.g. can write "x = arange(10)"
+		but be careful with direct function imports because they could conflict with python's native functions
+
+
+#####################
+## INTRO TO PYTHON ##
+#####################
+
+ASSIGNING VARIABLES
+
+	don't have to specify data type 
+	variable names must start with underscore or a letter (NOT a number)
+		variables case sensitive
+	define a string with single OR double quotes
+		x = "Obama kills a fly"
+		print(x)
+		prolly default to double quotes bc works with other formatting better
+	declare a numerical variable
+		y = 17
+		print(x, y, 'times a day')
+	Python is a "strongly typed" language
+		Once a data type is initialized, Python will enforce that data type
+		If you try to mix two different data types, it'll get mad at you
+		E.g. if you're trying to add x = 2 and y = '2'
+		can figure out data type with type(x)
+	assigned a variable to another does NOT necessarily copy the variable
+		in Python, it tends to creates a reference
+			x = [1,5]
+			y = x
+			y[0] = 3
+			now x = [3,5]
+		so if you copy x into variable y, changing y ALSO changes x
+		but there are ways to create unlinked copies
+	can't run line by line within a cell 
+
+CONTROL FLOW
+	
+	things won't work if indents aren't correct
+	if, elif, & else conditions
+		if x > 10: 
+			print("yep, it's greater than 10")
+		elif x == 10:	# elif = else if
+			print("x = 10")
+		else: 	# else is a catch all in case nothing was true; helps debug
+			print("who knows what x is - maybe imaginary?")
+	make practice to put else statement at end to catch errors
+
+FOR LOOPS
+	
+	iteratively do something a fixed number of times
+	for i in range(len(x)):
+		print("Iteration: ", i, x[i]*y[i])
+
+WHILE LOOPS
+
+	keeps looping until a condition is met
+		import random
+		x = random.random()
+		print(x)
+		while x < .99:
+		    x = random.random()
+		    print(x)
+	in this example, it keeps going as long as x is less than 0.99
+	can write in a break to escape an infinite loop
+
+LISTS, TUPLES, SETS AND DICTIONARIES
+
+	[] for lists
+	() for tuples (like lists but can't be changed)
+	{} for dictionaries
+
+	Python is 0 indexed
+
+##################
+## SECOND CLASS ##
+##################
+
+	Initializing an empty list and then filling it up with a for loop is actually super slow because you have to re-allocate memory based on the new list size every time you loop through
+	Copying
+		Reference -- variables are 100% tied
+		View -- data shared, but operations different
+		Copy -- variables are 100% independent
+	Fancy indexing
+		Creates an independent copy of part of an array
+
+#################
+## THIRD CLASS ##
+#################
+
+Tutorial020_BasicsFFT
+
+	FFT
+		Decomposing a signal into sinusoids and waves
+		This is a linear transform of the data 
+			I.e. you're not changing anything about it -- you're just transforming it from the time domain to the frequency domain
+			I.e. you can move back and forth without changing the data
+		Use dummy data to check your analysis pipeline
+		amp = (amp / len(sw) ) * 2
+			Divide by the length to normalize for the fact that the amplitude increases with the number of data points you have
+			Multiply by two to get rid of negative frequencies
+		Now the plot we get out confirms that our amplitude is 1 and our frequency is 10 (just as specified)
+	IFFT
+		The irfft function allows you to get the inverse of the fft, thus undoing the fft transform (and since it's linear, you should lose any information)
+		This direction, we're going from frequency domain back to the time domain
+	More complex example -- 3 sin waves
+		In this example, the time domain is the top plot (hard to tell what's contributing to the signal)
+		The bottom plot is in the frequency domain (you can easily see there are exactly 3 sin waves, one at 10, one at 20, and one at 30, with different amplitudes)
+	Adding some "white" noise
+		sw = sw + (np.random.rand(len(sw))-.5) * noise_amp
+			Draws random noise from -0.5 to 0.5 that's centered on 1
+		Top plot: time domain looks more noisy
+		Bottom plot: frequency domain also more noisy, but clearly still pulls out three main frequencies
+		If you turn up the noise, you can make the signal disappear
+			E.g. noise_amp = 2 shows signal nicely
+			noise_amp = 20 makes signal completely disappear
+	Relationship between time & frequency domains
+		Frequency > time
+			The longer the time interval, the higher your frequency resolution will be
+			HOWEVER, larger time bins mean you lose ability to tell WHEN something happens
+		Time > frequency
+			If you increase sample rate, you don't increase frequency resolution but you DO increase the range of frequencies you can estimate
+		"Generally speaking, sampling your data at a higher rate is always better (because of noise)
+		"
+	Nyquist limit
+		"You need to sample at a signal double the frequency you want to examine"
+		Top plot: the "actual" signal in your brain
+		Middle plot: if you sample at same frequency, you sample the peaks only (see black line), so it looks like there is NO signal at all
+		Bottom plot: if you sample at double the frequency, you perfectly capture the wave (black line)
+		Double the frequency you care about is the BARE MINIMUM; you can (and maybe should?) increase from there
+			Noise is the reason for want even more than 2 times the frequency you care about
+	Everything gets worse in the presence of noise!
+		For example, take a noisy 10hz signal
+			Sampled at 10hz: not remotely capturing the data
+			Sampled at 20hz: just barely starting to capture (and note this is 2 times the signal)
+			Sampled at 100hz: now we've perfectly captured it (this is much more than 2 times the signal, but works the best)
+
+EXERCISES
+
+	The point of this exercise is to show the impact of two different methods of applying FFT
+		Method 1:
+			FFT all trials
+			Compute amplitude
+			Then average across trials
+		Method 2:
+			Average across trials (i.e. in timme domain)
+			Then FFT
+			Then compute amplitude
+
+	ROWS X COLUMNS
+		Rows = trials (960 trials)
+		Columns = timepoints (876 timepoints per trial)
+
+				Timepoint 1		Timepoint 2		Timepoint 3
+		Trial 1      0               0              0
+		Trial 2      0               0              0 
+		Trial 3      0               0              0
+		Trial 4      0               0              0
+
+		tx = time of each data acquisition
+
+		np.mean(data, axis = 0)
+			axis = 0 allows you to average across rows
+
+
