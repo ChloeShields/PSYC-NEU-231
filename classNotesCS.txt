@@ -199,4 +199,26 @@ EXERCISES
 		np.mean(data, axis = 0)
 			axis = 0 allows you to average across rows
 
+##################
+## COMMAND LINE ##
+##################
 
+In github GUI
+	Repository --> Open in Command Prompt
+git status
+	tells you the status of your git
+git remote -v
+	origin: gives you readout of the location of your own files
+	upstream: gives you origin of main think
+git fetch upstream
+	pulls the upstream onto your computer (into a hidden area you can't see)
+git checkout -b "week_4"
+	this creates a new branch for your own changes, named with whatever you put in quotes
+git push -u origin "week_4"
+	to commit changes
+git pull upstream master
+	upstream points to john's repo, master points to the main branch (required that you specify)
+	green files are good -- they're ready to be committed
+	red files have to be dealt with
+		.ipynp_checkpoints can be removed (git rm [full file path])
+		
