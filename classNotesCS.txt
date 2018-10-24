@@ -221,4 +221,35 @@ git pull upstream master
 	green files are good -- they're ready to be committed
 	red files have to be dealt with
 		.ipynp_checkpoints can be removed (git rm [full file path])
-		
+git checkout --ours [file path]
+	to keep YOUR version of a file
+
+#################
+## TUTORIAL030 ##
+#################
+
+	stats package in scipy
+		has t-tests and other stats stuff
+	alpha = 0.5
+		sets the opacity in a histogram
+	stats.ttest_rel(x,y,axis = 0)
+		you ABSOLUTELY must specify the axis explicitly
+		axis = 0 means it looks across columns
+	2*(1-stats.t.cdf(x, N-1))
+		computing a p-value
+		could also get from stats.ttest_x
+	randomization
+		the null hypothesis is that condition labels don't matter
+		so to test, we jumble up the condition labels
+		now we can compute the probability of finding the p-value we got from our actual data by checking how likely it was to get that same p-value in our randomly generated null distribution
+	rand_data = np.sign(np.random.rand(N,num_studies)-.5) * (d1-d2)
+		code to randomly assign condition labels
+		turns everything into 0s or 1s?
+	rand_p_value = 2*(1-(np.sum(study_t_val>null_t_val) / num_randomizations))
+		check the number of times our t-value exceeded the null t-values
+		it's *2 because it's two-tailed 
+	randomization with correlation
+		now you decide whether to flip a pair of data points
+		so a pair can keep its x and y coordinates or a pair can be flipped
+			so that x value is now y value and vice versa
+			(data points are always still paired)
