@@ -253,3 +253,4 @@ git checkout --ours [file path]
 		so a pair can keep its x and y coordinates or a pair can be flipped
 			so that x value is now y value and vice versa
 			(data points are always still paired)
+			
