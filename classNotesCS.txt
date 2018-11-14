@@ -253,4 +253,72 @@ git checkout --ours [file path]
 		so a pair can keep its x and y coordinates or a pair can be flipped
 			so that x value is now y value and vice versa
 			(data points are always still paired)
-			
+
+#################
+## TUTORIAL040 ##
+#################
+
+	When training a model, you need to either train on half the data and test on the other half, or train on one dataset and then test on other, completely separate datasets
+		If you don't do this you will overfit your model (it'll be too perfect)
+		Note that it's much more impressive to train on one dataset and test on other datasets (bc generalization)
+	One point of this exercise is to show the importance of looking at data structure
+		If you just look at your means by condition, they can be exactly the same
+		But if you actually plot the data, you'll see there's actually a bunch of structure there
+			In this fake dataset, that's because our two neurons respond differently to our two experimental conditions
+	To deal with these data, we're going to split the data in half -- then train on one half and test on other
+	How big to make your training dataset?
+		If it's too small, it won't pick up on the pattern
+		If it's too large, it'll overfit the model and not generalize to other datasets
+	General rule is to train on 90% of data and test on other 10%
+		Note that in actual practice, one would repeatedly resample a different 90% and 10% from the data (this is called cross-validation with many folds, with a fold being each time you resample a new 90% and 10%)
+	Your training set NEEDS TO BE BALANCED
+		E.g. same number of datapoints from each trial and condition
+		Otherwise your model will be biased
+	TYPES OF TRAINING
+		1) Center of mass (a.k.a. euclidean distance)
+			This is assignment based on MASS
+			Compute the center of mass for each of our conditions
+			Then for each datapoint, we'll guess which condition it's from based on which center of mass it's closer to
+			This is a very simple approach
+		2) Center of mass, but normalized (a.k.a. normalized euclidean distance)
+			This is assignment based on MASS & VARIANCE
+			Here, we weight the distance by the variance of each variable
+			So if one neuron is noisier than the other (e.g., variance of 20 vs variance of 1), we want to trust the less noisy neuron more (i.e., overweight the neuron with variance of 1)
+			Difference in the code here is in the distance calculation, where it's the same except that we divide by the variance (/ pooled_variance)
+		3) Center of mass, but weighted by covariance structure (a.k.a. an extension of the normalized euclidean distance, called the mahalonobis distance)
+			This is assignment based on MASS, VARIANCE, and COVARIANCE
+			We need to account for correlational structure if we have it; otherwise we will misclassify our datapoints (because of the eliptical shape, many datapoints will be guessed as belonging to the wrong condition)
+			When we normalize, we essentially "undo" the correlation
+				Do this by dividing by the covariance structure
+			In practice, this looks like multiplying by the inverse of the covariance matrix
+				Because we can't divide by a matrix (for some linear algebra reason, idk)
+				@ in the code is a stand-in for np.
+
+#################
+## TUTORIAL041 ##
+#################
+
+	DRAWING BOUNDARIES
+		SVM = support vector machine
+			Tries to find the line with the largest margin from each marginal datapoint
+			A large criterion value ("C") will make it unlikely that marginal points make it onto the wrong side
+
+###############
+## COLORMAPS ##
+###############
+
+To improve the look of our plots, we can use colormaps!
+Colormaps are from matplotlib; see link below for color libraries:	
+	https://matplotlib.org/tutorials/colors/colormaps.html
+I implemented a colormap in this example:
+	# Get the mean across trials (axis = 0)
+		meanAcrossTrials = np.mean(data, axis = 0)
+	# Create color map to make plot prettier
+		n = 20 # n colors
+		colors = plt.cm.RdYlGn(np.linspace(0,1,n))
+	# Plot mean response over time for each electrode
+		for i in range(n): # get new color for each line using colormap above
+    		plt.plot(tx, meanAcrossTrials.T[:,i], color=colors[i])
+		plt.xlabel("Time (ms)", **figureFont)
+		plt.ylabel("Mean Response", **figureFont)
+		plt.show()
