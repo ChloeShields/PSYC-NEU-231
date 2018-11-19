@@ -223,6 +223,19 @@ git pull upstream master
 		.ipynp_checkpoints can be removed (git rm [full file path])
 git checkout --ours [file path]
 	to keep YOUR version of a file
+git merge upstream /master
+	this doesn't work
+
+HOW TO GET NEW CLASS FILES
+	push any changes made
+	git fetch upstream
+		pulls upstream onto computer (into hidden area you can't see)
+	git status
+		see okay files (green)
+		files with conflict (red)
+	resolve any conflict
+	git commit -m"Your commit message here"
+		commit changes
 
 #################
 ## TUTORIAL030 ##
@@ -322,3 +335,123 @@ I implemented a colormap in this example:
 		plt.xlabel("Time (ms)", **figureFont)
 		plt.ylabel("Mean Response", **figureFont)
 		plt.show()
+
+##################
+## TUTORIAL 050 ##
+##################
+
+USING PANDAS FOR DATA STRUCTURES AND DATA ANALYSIS
+
+SERIES
+	These are specifically 1D (referring to 1D nature of data; I guess labels don't count as a dimension)
+	The key thing is that all entries are labeled
+		E.g. Neuron 1, Neuron 2, or Subject 1, Subject 2
+	The link between the data and the labels is hard to break; this can be useful
+		So for example, if you have data for two different days where subjects were run in different order, you can just add the data together and Python will find and match subjects based on label (so you don't have to first sort them or something)
+	If you're going to go to the trouble of using labels, you should use ones that are actually useful and descriptive
+		I.e. "Subject 01" rather than "01"
+
+IMPORT LIBRARIES	
+	import numpy as np
+		as usual
+	import pandas as pd
+		(pd = standard notation)
+	import os
+	cwd = os.getcwd()
+		get and store current file path 
+		use this so that you don't have to hard code the file path
+
+CREATE A SERIES FROM AN NUMPY NDARRY
+	pd.Series(data, index = dataLabels)
+	We can now access the data using the data labels
+		series.dataLabel
+		series["dataLabels"]
+			will both work to access data
+	Can use this to check for membership	
+		"dataLabel" in series
+			"Is this label present in the data?"
+			returns True or False 
+	Get all data or all labels
+		series.index
+			to get data labels
+		series.values
+			to get data
+	Note that pandas calls strings "object"
+	dtype = dataTypeHere
+		use in pd.Series function to specify your datatype
+	copy = True/False
+		Use in pd.Series to specify whether or not to alter original data 
+		The default is copy = False, so the default is that you alter the original data 
+		If you use copy = True, any alterations to the Series will NOT change the original data
+
+USING NUMPY WITH PANDAS
+	You can transparently use most numpy functions with panda
+	Presumably, this is quite useful!
+	np.mean(Series)
+		Will get mean of the data (not the labels)
+	np.max(Series)
+		Will get max of the data (not the labels)
+
+OPERATIONS ACROSS DATASETS
+	If you have two separate datasets with matching labels (even if they're in different orders) you can perform operations across datasets because python finds the corresponding values using the labels for you (useful)
+
+
+##################
+## TUTORIAL 051 ##
+##################
+
+DataFrames are the 2D counterpart to Series
+	Essentially, this means we're gonna have more than 1 column now
+zip(dataArray1, dataArray2)
+	creates new array where the first element contains each of the first elements from dataArray1 and dataArray2
+zip(*dataArrayThatWasPreviouslyZipped)
+	use to unzip a previously zipped array
+pd.DataFrame(data = dataHere, index = dataLabels, columns = ["Column1", "Column2"])
+	To create a dataframe
+display(dataFrameName)
+	Will print out the dataframe with a slick design
+	Much nicer looking that print
+	Can customize what display() looks like by changing properties within the function (cool!)
+dataFrameName.head()
+	To peek at the first few rows to get an idea of the data structure
+dataFrameName.describe()
+	Gives you counts, mean, std, min, max, and percentiles
+	This is therefore a handy way to assess outliers
+		"How much density is in the data at different points here"
+	Now all these elements are indexable, so it's super easy to call them for your purposes later on (e.g. when removing outliers)
+dataFrameName.describe(percentiles = np.linspace(0, 1, 11))
+	gets every 10th percentile rather than quartiles
+
+CLEANING DATA 
+	NaN = "Not a Number"
+		If you're combining Series to make a DataFame, this indicates that there is no corresponding value for that data label in that particular Series
+	NaN is handy because it easily helps you identify where missing values are
+	The very first thing you should almost always do is check for NaNs and find out where they are
+		np.isnan(dataFrameName)
+			Prints dataframe, but with True and False to indicate where NaNs are (any True value indicates there's a NaN there)
+		pd.isna(dataFrameName)
+			Returns exactly the same thing as above
+		pd.notna(dataFrameName)
+			Returns the opposite -- returns False for NaNs
+		dataFrameName["Column1"].notna()
+			Checks a specific column for NaNs
+	What to do with NaNs (different possibilities)
+		dataFrameName.interpolate()
+			Will replace the NaN with the average of the two cells above and below
+			If it's the last value in the column, will just copy the value before
+		dataFrameName.fillna(dataFrameName.mean()["Column1"])
+			Fills NaN with the mean for Column 1
+
+INDEXING
+	dataFrameName["Column1"][1]
+		to get out second value from first column
+		this is known as "double indexing"
+
+DATA ALIGNMENT
+	You can join two dataframes with different shapes
+	And it will combine the union of those
+	So any area where they don't overlap will be replaced with NaN when you perform operations
+	This is helpful when you have typos in your data labels, because it will throw up NaNs for areas where you don't have overlap
+
+INTERFACING WITH DATAFRAMES
+	The nice thing about dataframes in pandas is that you can move it basically 1-to-1 to R, if you want to do some complex stats there
