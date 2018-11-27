@@ -199,4 +199,259 @@ EXERCISES
 		np.mean(data, axis = 0)
 			axis = 0 allows you to average across rows
 
+##################
+## COMMAND LINE ##
+##################
 
+In github GUI
+	Repository --> Open in Command Prompt
+git status
+	tells you the status of your git
+git remote -v
+	origin: gives you readout of the location of your own files
+	upstream: gives you origin of main think
+git fetch upstream
+	pulls the upstream onto your computer (into a hidden area you can't see)
+git checkout -b "week_4"
+	this creates a new branch for your own changes, named with whatever you put in quotes
+git push -u origin "week_4"
+	to commit changes
+git pull upstream master
+	upstream points to john's repo, master points to the main branch (required that you specify)
+	green files are good -- they're ready to be committed
+	red files have to be dealt with
+		.ipynp_checkpoints can be removed (git rm [full file path])
+git checkout --ours [file path]
+	to keep YOUR version of a file
+git merge upstream /master
+	this doesn't work
+
+HOW TO GET NEW CLASS FILES
+	push any changes made
+	git fetch upstream
+		pulls upstream onto computer (into hidden area you can't see)
+	git status
+		see okay files (green)
+		files with conflict (red)
+	resolve any conflict
+	git commit -m"Your commit message here"
+		commit changes
+
+#################
+## TUTORIAL030 ##
+#################
+
+	stats package in scipy
+		has t-tests and other stats stuff
+	alpha = 0.5
+		sets the opacity in a histogram
+	stats.ttest_rel(x,y,axis = 0)
+		you ABSOLUTELY must specify the axis explicitly
+		axis = 0 means it looks across columns
+	2*(1-stats.t.cdf(x, N-1))
+		computing a p-value
+		could also get from stats.ttest_x
+	randomization
+		the null hypothesis is that condition labels don't matter
+		so to test, we jumble up the condition labels
+		now we can compute the probability of finding the p-value we got from our actual data by checking how likely it was to get that same p-value in our randomly generated null distribution
+	rand_data = np.sign(np.random.rand(N,num_studies)-.5) * (d1-d2)
+		code to randomly assign condition labels
+		turns everything into 0s or 1s?
+	rand_p_value = 2*(1-(np.sum(study_t_val>null_t_val) / num_randomizations))
+		check the number of times our t-value exceeded the null t-values
+		it's *2 because it's two-tailed 
+	randomization with correlation
+		now you decide whether to flip a pair of data points
+		so a pair can keep its x and y coordinates or a pair can be flipped
+			so that x value is now y value and vice versa
+			(data points are always still paired)
+
+#################
+## TUTORIAL040 ##
+#################
+
+	When training a model, you need to either train on half the data and test on the other half, or train on one dataset and then test on other, completely separate datasets
+		If you don't do this you will overfit your model (it'll be too perfect)
+		Note that it's much more impressive to train on one dataset and test on other datasets (bc generalization)
+	One point of this exercise is to show the importance of looking at data structure
+		If you just look at your means by condition, they can be exactly the same
+		But if you actually plot the data, you'll see there's actually a bunch of structure there
+			In this fake dataset, that's because our two neurons respond differently to our two experimental conditions
+	To deal with these data, we're going to split the data in half -- then train on one half and test on other
+	How big to make your training dataset?
+		If it's too small, it won't pick up on the pattern
+		If it's too large, it'll overfit the model and not generalize to other datasets
+	General rule is to train on 90% of data and test on other 10%
+		Note that in actual practice, one would repeatedly resample a different 90% and 10% from the data (this is called cross-validation with many folds, with a fold being each time you resample a new 90% and 10%)
+	Your training set NEEDS TO BE BALANCED
+		E.g. same number of datapoints from each trial and condition
+		Otherwise your model will be biased
+	TYPES OF TRAINING
+		1) Center of mass (a.k.a. euclidean distance)
+			This is assignment based on MASS
+			Compute the center of mass for each of our conditions
+			Then for each datapoint, we'll guess which condition it's from based on which center of mass it's closer to
+			This is a very simple approach
+		2) Center of mass, but normalized (a.k.a. normalized euclidean distance)
+			This is assignment based on MASS & VARIANCE
+			Here, we weight the distance by the variance of each variable
+			So if one neuron is noisier than the other (e.g., variance of 20 vs variance of 1), we want to trust the less noisy neuron more (i.e., overweight the neuron with variance of 1)
+			Difference in the code here is in the distance calculation, where it's the same except that we divide by the variance (/ pooled_variance)
+		3) Center of mass, but weighted by covariance structure (a.k.a. an extension of the normalized euclidean distance, called the mahalonobis distance)
+			This is assignment based on MASS, VARIANCE, and COVARIANCE
+			We need to account for correlational structure if we have it; otherwise we will misclassify our datapoints (because of the eliptical shape, many datapoints will be guessed as belonging to the wrong condition)
+			When we normalize, we essentially "undo" the correlation
+				Do this by dividing by the covariance structure
+			In practice, this looks like multiplying by the inverse of the covariance matrix
+				Because we can't divide by a matrix (for some linear algebra reason, idk)
+				@ in the code is a stand-in for np.
+
+#################
+## TUTORIAL041 ##
+#################
+
+	DRAWING BOUNDARIES
+		SVM = support vector machine
+			Tries to find the line with the largest margin from each marginal datapoint
+			A large criterion value ("C") will make it unlikely that marginal points make it onto the wrong side
+
+###############
+## COLORMAPS ##
+###############
+
+To improve the look of our plots, we can use colormaps!
+Colormaps are from matplotlib; see link below for color libraries:	
+	https://matplotlib.org/tutorials/colors/colormaps.html
+I implemented a colormap in this example:
+	# Get the mean across trials (axis = 0)
+		meanAcrossTrials = np.mean(data, axis = 0)
+	# Create color map to make plot prettier
+		n = 20 # n colors
+		colors = plt.cm.RdYlGn(np.linspace(0,1,n))
+	# Plot mean response over time for each electrode
+		for i in range(n): # get new color for each line using colormap above
+    		plt.plot(tx, meanAcrossTrials.T[:,i], color=colors[i])
+		plt.xlabel("Time (ms)", **figureFont)
+		plt.ylabel("Mean Response", **figureFont)
+		plt.show()
+
+##################
+## TUTORIAL 050 ##
+##################
+
+USING PANDAS FOR DATA STRUCTURES AND DATA ANALYSIS
+
+SERIES
+	These are specifically 1D (referring to 1D nature of data; I guess labels don't count as a dimension)
+	The key thing is that all entries are labeled
+		E.g. Neuron 1, Neuron 2, or Subject 1, Subject 2
+	The link between the data and the labels is hard to break; this can be useful
+		So for example, if you have data for two different days where subjects were run in different order, you can just add the data together and Python will find and match subjects based on label (so you don't have to first sort them or something)
+	If you're going to go to the trouble of using labels, you should use ones that are actually useful and descriptive
+		I.e. "Subject 01" rather than "01"
+
+IMPORT LIBRARIES	
+	import numpy as np
+		as usual
+	import pandas as pd
+		(pd = standard notation)
+	import os
+	cwd = os.getcwd()
+		get and store current file path 
+		use this so that you don't have to hard code the file path
+
+CREATE A SERIES FROM AN NUMPY NDARRY
+	pd.Series(data, index = dataLabels)
+	We can now access the data using the data labels
+		series.dataLabel
+		series["dataLabels"]
+			will both work to access data
+	Can use this to check for membership	
+		"dataLabel" in series
+			"Is this label present in the data?"
+			returns True or False 
+	Get all data or all labels
+		series.index
+			to get data labels
+		series.values
+			to get data
+	Note that pandas calls strings "object"
+	dtype = dataTypeHere
+		use in pd.Series function to specify your datatype
+	copy = True/False
+		Use in pd.Series to specify whether or not to alter original data 
+		The default is copy = False, so the default is that you alter the original data 
+		If you use copy = True, any alterations to the Series will NOT change the original data
+
+USING NUMPY WITH PANDAS
+	You can transparently use most numpy functions with panda
+	Presumably, this is quite useful!
+	np.mean(Series)
+		Will get mean of the data (not the labels)
+	np.max(Series)
+		Will get max of the data (not the labels)
+
+OPERATIONS ACROSS DATASETS
+	If you have two separate datasets with matching labels (even if they're in different orders) you can perform operations across datasets because python finds the corresponding values using the labels for you (useful)
+
+
+##################
+## TUTORIAL 051 ##
+##################
+
+DataFrames are the 2D counterpart to Series
+	Essentially, this means we're gonna have more than 1 column now
+zip(dataArray1, dataArray2)
+	creates new array where the first element contains each of the first elements from dataArray1 and dataArray2
+zip(*dataArrayThatWasPreviouslyZipped)
+	use to unzip a previously zipped array
+pd.DataFrame(data = dataHere, index = dataLabels, columns = ["Column1", "Column2"])
+	To create a dataframe
+display(dataFrameName)
+	Will print out the dataframe with a slick design
+	Much nicer looking that print
+	Can customize what display() looks like by changing properties within the function (cool!)
+dataFrameName.head()
+	To peek at the first few rows to get an idea of the data structure
+dataFrameName.describe()
+	Gives you counts, mean, std, min, max, and percentiles
+	This is therefore a handy way to assess outliers
+		"How much density is in the data at different points here"
+	Now all these elements are indexable, so it's super easy to call them for your purposes later on (e.g. when removing outliers)
+dataFrameName.describe(percentiles = np.linspace(0, 1, 11))
+	gets every 10th percentile rather than quartiles
+
+CLEANING DATA 
+	NaN = "Not a Number"
+		If you're combining Series to make a DataFame, this indicates that there is no corresponding value for that data label in that particular Series
+	NaN is handy because it easily helps you identify where missing values are
+	The very first thing you should almost always do is check for NaNs and find out where they are
+		np.isnan(dataFrameName)
+			Prints dataframe, but with True and False to indicate where NaNs are (any True value indicates there's a NaN there)
+		pd.isna(dataFrameName)
+			Returns exactly the same thing as above
+		pd.notna(dataFrameName)
+			Returns the opposite -- returns False for NaNs
+		dataFrameName["Column1"].notna()
+			Checks a specific column for NaNs
+	What to do with NaNs (different possibilities)
+		dataFrameName.interpolate()
+			Will replace the NaN with the average of the two cells above and below
+			If it's the last value in the column, will just copy the value before
+		dataFrameName.fillna(dataFrameName.mean()["Column1"])
+			Fills NaN with the mean for Column 1
+
+INDEXING
+	dataFrameName["Column1"][1]
+		to get out second value from first column
+		this is known as "double indexing"
+
+DATA ALIGNMENT
+	You can join two dataframes with different shapes
+	And it will combine the union of those
+	So any area where they don't overlap will be replaced with NaN when you perform operations
+	This is helpful when you have typos in your data labels, because it will throw up NaNs for areas where you don't have overlap
+
+INTERFACING WITH DATAFRAMES
+	The nice thing about dataframes in pandas is that you can move it basically 1-to-1 to R, if you want to do some complex stats there
